@@ -16,10 +16,10 @@ timezone: Asia/Shanghai
 
 title: jsp-base # the main title
 
-tagline: A text-focused Jekyll theme # it will display as the subtitle
+tagline: JSP 课程作业记录 # it will display as the subtitle
 
 description: >- # used by seo meta and the atom feed
-  A minimal, responsive and feature-rich Jekyll theme for technical writing.
+  JSP 课程作业的源码与实现记录，每章附可运行页面与完整代码。
 
 # Fill in the protocol & hostname for your site.
 # E.g. 'https://username.github.io', note that it does not end with a '/'.
@@ -29,18 +29,17 @@ github:
   username: 102300671 # change to your GitHub username
 
 twitter:
-  username: twitter_username # change to your Twitter username
+  username: # 未使用 Twitter，留空避免生成失效链接
 
 social:
   # Change to your full name.
   # It will be displayed as the default author of the posts and the copyright owner in the Footer
-  name: your_full_name
-  email: example@domain.com # change to your email address
+  name: 吕林涵
+  email: jy2193807541@gmail.com
   fediverse_handle: # fill in your fediverse handle. E.g. "@username@domain.com"
   links:
     # The first element serves as the copyright owner's link
-    - https://twitter.com/username # change to your Twitter homepage
-    - https://github.com/102300671 # change to your GitHub homepage
+    - https://github.com/102300671 # 首个元素作为版权所有者链接
     # Uncomment below to add more social links
     # - https://www.facebook.com/username
     # - https://www.linkedin.com/in/username
