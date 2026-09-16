@@ -124,7 +124,7 @@ tags: [JSP]
 
 > **运行地址：**
 > - 本地：<$URL_BASE/$MODULE/>
-> - 云服务器：<$SERVER_URL_BASE/$MODULE/>（部署后可用）
+> - 云服务器：<$SERVER_URL_BASE/$MODULE/>
 >
 > 本章是动态 JSP 页面，需在 Tomcat 中运行才能访问；GitHub Pages 是纯静态托管，无法执行 JSP。
 > 本地启动：\`service tomcat10 start\`
@@ -140,5 +140,5 @@ log ""
 log "✅ 完成：$MODULE（第 $NUM 章）"
 log ""
 log "访问:   $URL_BASE/$MODULE/（本地）"
-log "          $SERVER_URL_BASE/$MODULE/（云服务器，部署后可用）"
+log "          $SERVER_URL_BASE/$MODULE/（云服务器）"
 log "改完 Java 后:  cd jsp-src && mvn -q compile"

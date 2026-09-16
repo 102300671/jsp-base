@@ -73,7 +73,7 @@ service tomcat10 start
 访问：
 
 - 本地：<http://localhost:8080/jsp-base/>
-- 云服务器：<http://59.110.163.88:8080/jsp-base/>（部署后可用）
+- 云服务器：<http://59.110.163.88:8080/jsp-base/>
 
 > GitHub Pages 是纯静态托管，无法执行 JSP；作业页面需在 Tomcat 中运行。
 
