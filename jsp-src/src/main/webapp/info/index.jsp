@@ -10,7 +10,7 @@
 </head>
 <body>
   <h1>信息</h1>
-  <%= "202407044130吕林涵" %><br>
+  <%= "20240704****吕**" %><br>
   <%
     SimpleDateFormat df = new SimpleDateFormat("yyyy-M-d HH:mm:ss");
   %>
