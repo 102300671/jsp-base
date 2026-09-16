@@ -30,3 +30,7 @@ assets/js/dist
 *~
 .DS_Store
 Thumbs.db
+
+jsp-src/target/
+jsp-src/src/main/webapp/WEB-INF/classes/
+_site/
