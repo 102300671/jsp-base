@@ -1,6 +1,20 @@
 require 'cgi'
+require 'rouge'
 
 module Jekyll
+  # 源码嵌入：Rouge 语法高亮 + 移动端自动换行
+  module SourceCode
+    # 移动端自动换行：pre-wrap 保留缩进并按需换行，word-break 防止长行溢出
+    WRAP_STYLE = 'white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;'.freeze
+
+    def self.render(content, lang)
+      lexer = Rouge::Lexer.find_fancy(lang) || Rouge::Lexers::PlainText
+      formatter = Rouge::Formatters::HTML.new(css_class: 'highlight')
+      highlighted = formatter.format(lexer.lex(content))
+      %(<div class="language-#{CGI.escapeHTML(lang)} highlighter-rouge"><pre class="highlight" style="#{WRAP_STYLE}">#{highlighted}</pre></div>)
+    end
+  end
+
   class IncludeSourceTag < Liquid::Tag
     def initialize(tag_name, markup, tokens)
       super
@@ -11,9 +25,8 @@ module Jekyll
       site = context.registers[:site]
       full = File.join(site.source, @path)
       return "<!-- not found: #{@path} -->" unless File.exist?(full)
-      lang    = File.extname(@path).sub('.', '')
-      escaped = CGI.escapeHTML(File.read(full))
-      %(<pre><code class="language-#{lang}">#{escaped}</code></pre>)
+      lang = File.extname(@path).sub('.', '')
+      SourceCode.render(File.read(full), lang)
     end
   end
 
@@ -35,10 +48,9 @@ module Jekyll
       files.sort!
 
       files.map do |f|
-        rel     = f.sub(site.source + '/', '')
-        lang    = File.extname(f).sub('.', '')
-        escaped = CGI.escapeHTML(File.read(f))
-        "### #{rel}\n\n<pre><code class=\"language-#{lang}\">#{escaped}</code></pre>\n\n"
+        rel  = f.sub(site.source + '/', '')
+        lang = File.extname(f).sub('.', '')
+        "### #{rel}\n\n#{SourceCode.render(File.read(f), lang)}\n\n"
       end.join
     end
   end
