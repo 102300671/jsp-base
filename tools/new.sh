@@ -121,7 +121,10 @@ categories: [作业, JSP]
 tags: [JSP]
 ---
 
-[打开作业页面]($URL_BASE/$MODULE/)
+> **运行地址（仅本地）：** <$URL_BASE/$MODULE/>
+>
+> 本章是动态 JSP 页面，需在本地 Tomcat 中运行才能访问；GitHub Pages 是纯静态托管，无法执行 JSP。
+> 本地启动：\`service tomcat10 start\`
 
 ## 源码
 
