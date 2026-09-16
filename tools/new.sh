@@ -12,6 +12,7 @@ JAVA_PKG="$JSP_DIR/src/main/java/place/run/jianying"
 PORTAL="$WEBAPP/index.jsp"
 MARKER="<!-- NEW_HW_HERE -->"
 URL_BASE="${URL_BASE:-http://localhost:8080/jsp-base}"
+SERVER_URL_BASE="${SERVER_URL_BASE:-http://59.110.163.88:8080/jsp-base}"
 
 log()  { printf '%s\n' "$*"; }
 ok()   { printf '  \033[32m[create]\033[0m %s\n' "$*"; }
@@ -121,9 +122,11 @@ categories: [作业, JSP]
 tags: [JSP]
 ---
 
-> **运行地址（仅本地）：** <$URL_BASE/$MODULE/>
+> **运行地址：**
+> - 本地：<$URL_BASE/$MODULE/>
+> - 云服务器：<$SERVER_URL_BASE/$MODULE/>（部署后可用）
 >
-> 本章是动态 JSP 页面，需在本地 Tomcat 中运行才能访问；GitHub Pages 是纯静态托管，无法执行 JSP。
+> 本章是动态 JSP 页面，需在 Tomcat 中运行才能访问；GitHub Pages 是纯静态托管，无法执行 JSP。
 > 本地启动：\`service tomcat10 start\`
 
 ## 源码
@@ -136,5 +139,6 @@ fi
 log ""
 log "✅ 完成：$MODULE（第 $NUM 章）"
 log ""
-log "访问:   $URL_BASE/$MODULE/"
+log "访问:   $URL_BASE/$MODULE/（本地）"
+log "          $SERVER_URL_BASE/$MODULE/（云服务器，部署后可用）"
 log "改完 Java 后:  cd jsp-src && mvn -q compile"
