@@ -2,7 +2,8 @@
 set -uo pipefail
 
 # 幂等创建作业子模块
-# 用法: ./tools/new-hw.sh <序号> <名称> [显示标题] [描述]
+# 用法: ./tools/new.sh <序号> <名称> [显示标题] [描述]
+# 目录结构: webapp/lab<序号>/<名称>  +  java/place/run/jianying/lab<序号>/<包名>
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -21,13 +22,17 @@ warn() { printf '  \033[33m[warn]\033[0m   %s\n' "$*" >&2; }
 die()  { printf '\033[31m错误:\033[0m %s\n' "$*" >&2; exit 1; }
 
 if [ $# -lt 2 ]; then
-  cat >&2 <<EOF
+  cat >&2 <<USAGE
 用法: $0 <序号> <名称> [显示标题] [描述]
 
 示例:
-  $0 1 homepage "个人主页" "HTML/CSS 基础"
-  $0 3 login    "用户登录" "Servlet + Session"
-EOF
+  $0 1 info "信息" "输出"
+  $0 3 login "用户登录" "Servlet + Session"
+
+目录结构:
+  webapp/lab<序号>/<名称>/        (JSP 页面)
+  java/place/run/jianying/lab<序号>/<包名>/  (Java 源码)
+USAGE
   exit 1
 fi
 
@@ -38,25 +43,26 @@ TITLE="${3:-$NAME}"; DESC="${4:-}"
 NUM=$(printf "%02d" "$NUM_RAW")
 [[ "$NAME" =~ ^[a-z0-9][a-z0-9-]*$ ]] || die "名称只能小写字母/数字/连字符"
 
+LAB="lab$NUM_RAW"
 MODULE="$NAME"
 PKG="${NAME//-/}"                     # 包名去连字符
-MODULE_WEB="$WEBAPP/$MODULE"
-MODULE_JAVA="$JAVA_PKG/$PKG"
+MODULE_WEB="$WEBAPP/$LAB/$MODULE"
+MODULE_JAVA="$JAVA_PKG/$LAB/$PKG"
 
 [ -d "$JSP_DIR" ] || die "找不到 $JSP_DIR"
 
-log "▶ 处理模块 $MODULE（第 $NUM 章）"
+log "▶ 处理模块 $MODULE（第 $NUM 章，目录 $LAB/）"
 
 # 1) webapp 子目录
-if [ -d "$MODULE_WEB" ]; then skip "jsp-src/src/main/webapp/$MODULE/"
-else mkdir -p "$MODULE_WEB"; ok "jsp-src/src/main/webapp/$MODULE/"; fi
+if [ -d "$MODULE_WEB" ]; then skip "jsp-src/src/main/webapp/$LAB/$MODULE/"
+else mkdir -p "$MODULE_WEB"; ok "jsp-src/src/main/webapp/$LAB/$MODULE/"; fi
 
 # 2) index.jsp
 IDX="$MODULE_WEB/index.jsp"
 if [ -f "$IDX" ]; then
-  skip "jsp-src/src/main/webapp/$MODULE/index.jsp"
+  skip "jsp-src/src/main/webapp/$LAB/$MODULE/index.jsp"
 else
-  cat > "$IDX" <<EOF
+  cat > "$IDX" <<INDEX
 <%@ page contentType="text/html;charset=UTF-8" %>
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -69,32 +75,33 @@ else
   <p>待实现。</p>
 </body>
 </html>
-EOF
-  ok "jsp-src/src/main/webapp/$MODULE/index.jsp"
+INDEX
+  ok "jsp-src/src/main/webapp/$LAB/$MODULE/index.jsp"
 fi
 
 # 3) java 包
 if [ -d "$MODULE_JAVA" ]; then
-  skip "jsp-src/src/main/java/place/run/jianying/$PKG/"
+  skip "jsp-src/src/main/java/place/run/jianying/$LAB/$PKG/"
 else
   mkdir -p "$MODULE_JAVA"
-  ok "jsp-src/src/main/java/place/run/jianying/$PKG/"
+  ok "jsp-src/src/main/java/place/run/jianying/$LAB/$PKG/"
 fi
 
 # 4) portal 导航
+NAV_HREF="/jsp-base/$LAB/$MODULE/"
 if [ ! -f "$PORTAL" ]; then
   warn "找不到 $PORTAL（跳过导航）"
 elif ! grep -q "$MARKER" "$PORTAL"; then
   warn "$PORTAL 里没有 $MARKER 标记（跳过导航）"
-elif grep -q "href=\"/jsp-base/$MODULE/\"" "$PORTAL"; then
+elif grep -q "href=\"$NAV_HREF\"" "$PORTAL"; then
   skip "portal 已含 $MODULE 导航项"
 else
   DESC_LINE="      <div class=\"desc\">第 $NUM 章${DESC:+ · $DESC}</div>"
-  awk -v marker="$MARKER" -v mod="$MODULE" -v title="$TITLE" \
+  awk -v marker="$MARKER" -v href="$NAV_HREF" -v title="$TITLE" \
       -v desc="$DESC_LINE" -v chap="$NUM" '
     index($0, marker) && !done {
       print "    <li data-chapter=\"" chap "\">"
-      print "      <a href=\"/jsp-base/" mod "/\">第 " chap " 章 · " title "</a>"
+      print "      <a href=\"" href "\">第 " chap " 章 · " title "</a>"
       print desc
       print "    </li>"
       done=1
@@ -112,7 +119,7 @@ if [ -n "${EXISTING:-}" ]; then
   skip "文章已存在: ${EXISTING#$ROOT_DIR/}"
 else
   mkdir -p "$ROOT_DIR/_posts"
-  cat > "$POST_FILE" <<EOF
+  cat > "$POST_FILE" <<POST
 ---
 layout: post
 title: "第 $NUM 章 · $TITLE"
@@ -123,22 +130,22 @@ tags: [JSP]
 ---
 
 > **运行地址：**
-> - 本地：<$URL_BASE/$MODULE/>
-> - 云服务器：<$SERVER_URL_BASE/$MODULE/>
+> - 本地：<$URL_BASE/$LAB/$MODULE/>
+> - 云服务器：<$SERVER_URL_BASE/$LAB/$MODULE/>
 >
 > 本章是动态 JSP 页面，需在 Tomcat 中运行才能访问；GitHub Pages 是纯静态托管，无法执行 JSP。
-> 本地启动：\`service tomcat10 start\`
+> 本地启动：`service tomcat10 start`
 
 ## 源码
 
-{% include_tree jsp-src/src/main/webapp/$MODULE jsp,html,css,js %}
-EOF
+{% include_tree jsp-src/src/main/webapp/$LAB/$MODULE jsp,html,css,js %}
+POST
   ok "_posts/${TODAY}-${MODULE}.md"
 fi
 
 log ""
 log "✅ 完成：$MODULE（第 $NUM 章）"
 log ""
-log "访问:   $URL_BASE/$MODULE/（本地）"
-log "          $SERVER_URL_BASE/$MODULE/（云服务器）"
+log "访问:   $URL_BASE/$LAB/$MODULE/（本地）"
+log "          $SERVER_URL_BASE/$LAB/$MODULE/（云服务器）"
 log "改完 Java 后:  cd jsp-src && mvn -q compile"

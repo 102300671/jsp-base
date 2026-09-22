@@ -17,7 +17,7 @@
   <h1>📚 课程作业导航</h1>
   <ul>
     <li data-chapter="01">
-      <a href="/jsp-base/info/">第 01 章 · 信息</a>
+      <a href="/jsp-base/lab1/info/">第 01 章 · 信息</a>
       <div class="desc">第 01 章 · 输出</div>
     </li>
     <!-- NEW_HW_HERE -->
