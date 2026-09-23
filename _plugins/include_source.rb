@@ -81,28 +81,44 @@ module Jekyll
             if (link) link.setAttribute('href', url);
           }
 
-          /* 混合内容：HTTPS 页面无法嵌入 HTTP iframe，显示提示 + 新窗口链接 */
-          function showNotice(f, url) {
-            f.setAttribute('data-resolved', 'about:blank');
+          /* 在预览区显示提示；sticky=true 时不允许重新探测（HTTP 混合内容永久阻断） */
+          function showNotice(f, html, sticky) {
             f.src = 'about:blank';
+            if (sticky) f.setAttribute('data-resolved', 'about:blank');
             var box = f.closest('.isrc');
             if (!box) return;
             var pane = box.querySelector('.isrc-preview');
-            if (!pane || pane.querySelector('.isrc-notice')) return;
+            if (!pane) return;
+            var old = pane.querySelector('.isrc-notice');
+            if (old) old.remove();
             var div = document.createElement('div');
             div.className = 'isrc-notice';
-            div.innerHTML = '<p>HTTPS 页面无法嵌入 HTTP 预览</p>' +
-              '<a href="' + url + '" target="_blank" rel="noopener">在新窗口打开 ↗</a>';
+            div.innerHTML = html;
             pane.appendChild(div);
+          }
+
+          /* 证书未信任时的提示 */
+          function showCertNotice(f, url) {
+            showNotice(f,
+              '<p>需要先信任证书才能预览</p>' +
+              '<p style="font-size:0.8rem">点击下方链接在新窗口打开，接受证书警告后回到此处再点「预览」</p>' +
+              '<a href="' + url + '" target="_blank" rel="noopener">在新窗口打开 ↗</a>');
           }
 
           /* 云端优先、本地回退：探测云端可达性，3s 超时则用 fallback */
           function resolveSrc(f) {
             var resolved = f.getAttribute('data-resolved');
-            if (resolved) { f.src = resolved; setOpenLink(f, resolved); return; }
+            if (resolved) {
+              if (resolved !== 'about:blank') { f.src = resolved; setOpenLink(f, resolved); }
+              return;
+            }
             var cloud = f.getAttribute('data-src');
             var local = f.getAttribute('data-fallback');
             if (!local || !cloud) { f.src = cloud || local || ''; return; }
+
+            /* 清除可能存在的旧提示（证书信任后重新探测） */
+            var box0 = f.closest('.isrc');
+            if (box0) { var n0 = box0.querySelector('.isrc-notice'); if (n0) n0.remove(); }
 
             /* HTTPS 页面嵌入 HTTP 内容会被浏览器阻止（混合内容策略） */
             var httpsPage = location.protocol === 'https:';
@@ -111,17 +127,35 @@ module Jekyll
                 f.setAttribute('data-resolved', local);
                 f.src = local; setOpenLink(f, local);
               } else {
-                showNotice(f, cloud);
+                showNotice(f,
+                  '<p>HTTPS 页面无法嵌入 HTTP 预览</p>' +
+                  '<a href="' + cloud + '" target="_blank" rel="noopener">在新窗口打开 ↗</a>', true);
               }
               return;
             }
 
-            /* HTTPS 页面 + HTTPS 云端 + HTTP 回退 → 直接加载云端，跳过探测
-               （自签证书会让 fetch 探测失败，但 iframe 在用户接受证书后可用；
-                HTTP 回退在 HTTPS 页面无法嵌入，探测无意义） */
+            /* HTTPS 页面 + HTTPS 云端 + HTTP 回退 → 探测证书是否已信任
+               （自签证书未信任时 fetch 失败；信任后成功，iframe 可嵌入。
+                不设 data-resolved，允许用户接受证书后重新点「预览」重试） */
             if (httpsPage && /^https:/.test(cloud) && /^http:/.test(local)) {
-              f.setAttribute('data-resolved', cloud);
-              f.src = cloud; setOpenLink(f, cloud);
+              var done = false;
+              var ctrl2 = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+              var timer2 = setTimeout(function () {
+                if (done) return; done = true;
+                if (ctrl2) try { ctrl2.abort(); } catch (e) {}
+                showCertNotice(f, cloud);
+              }, 3000);
+              fetch(cloud, { mode: 'no-cors', cache: 'no-store',
+                             signal: ctrl2 ? ctrl2.signal : undefined })
+                .then(function () {
+                  if (done) return; done = true; clearTimeout(timer2);
+                  f.setAttribute('data-resolved', cloud);
+                  f.src = cloud; setOpenLink(f, cloud);
+                })
+                .catch(function () {
+                  if (done) return; done = true; clearTimeout(timer2);
+                  showCertNotice(f, cloud);
+                });
               return;
             }
 
