@@ -170,7 +170,7 @@ baseurl: "/jsp-base"
 # 也可在单个标签上用 base=... fallback=... 临时覆盖
 include_source:
   webapp_root: "jsp-src/src/main/webapp"
-  preview_base: "http://59.110.163.88:8080/jsp-base"
+  preview_base: "https://59.110.163.88:8443/jsp-base"
   preview_base_fallback: "http://localhost:8080/jsp-base"
 
 # ------------ The following options are not recommended to be modified ------------------

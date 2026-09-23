@@ -60,6 +60,14 @@ module Jekyll
           box-shadow: var(--language-border-color, #dee2e6) 0 0 0 1px;
         }
         .isrc-preview iframe { display: block; width: 100%; height: 100%; border: 0; }
+        .isrc-preview { position: relative; }
+        .isrc-notice {
+          position: absolute; inset: 0;
+          display: flex; align-items: center; justify-content: center;
+          flex-direction: column; gap: 0.5rem;
+          font-size: 0.9rem; color: #6c757d; background: #fff; text-align: center; padding: 1rem;
+        }
+        .isrc-notice a { color: var(--bs-primary, #3674b9); text-decoration: underline; }
       </style>
       <script>
         (function () {
@@ -73,6 +81,21 @@ module Jekyll
             if (link) link.setAttribute('href', url);
           }
 
+          /* 混合内容：HTTPS 页面无法嵌入 HTTP iframe，显示提示 + 新窗口链接 */
+          function showNotice(f, url) {
+            f.setAttribute('data-resolved', 'about:blank');
+            f.src = 'about:blank';
+            var box = f.closest('.isrc');
+            if (!box) return;
+            var pane = box.querySelector('.isrc-preview');
+            if (!pane || pane.querySelector('.isrc-notice')) return;
+            var div = document.createElement('div');
+            div.className = 'isrc-notice';
+            div.innerHTML = '<p>HTTPS 页面无法嵌入 HTTP 预览</p>' +
+              '<a href="' + url + '" target="_blank" rel="noopener">在新窗口打开 ↗</a>';
+            pane.appendChild(div);
+          }
+
           /* 云端优先、本地回退：探测云端可达性，3s 超时则用 fallback */
           function resolveSrc(f) {
             var resolved = f.getAttribute('data-resolved');
@@ -80,6 +103,27 @@ module Jekyll
             var cloud = f.getAttribute('data-src');
             var local = f.getAttribute('data-fallback');
             if (!local || !cloud) { f.src = cloud || local || ''; return; }
+
+            /* HTTPS 页面嵌入 HTTP 内容会被浏览器阻止（混合内容策略） */
+            var httpsPage = location.protocol === 'https:';
+            if (httpsPage && /^http:/.test(cloud)) {
+              if (local && /^https:/.test(local)) {
+                f.setAttribute('data-resolved', local);
+                f.src = local; setOpenLink(f, local);
+              } else {
+                showNotice(f, cloud);
+              }
+              return;
+            }
+
+            /* HTTPS 页面 + HTTPS 云端 + HTTP 回退 → 直接加载云端，跳过探测
+               （自签证书会让 fetch 探测失败，但 iframe 在用户接受证书后可用；
+                HTTP 回退在 HTTPS 页面无法嵌入，探测无意义） */
+            if (httpsPage && /^https:/.test(cloud) && /^http:/.test(local)) {
+              f.setAttribute('data-resolved', cloud);
+              f.src = cloud; setOpenLink(f, cloud);
+              return;
+            }
 
             var done = false;
             var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
