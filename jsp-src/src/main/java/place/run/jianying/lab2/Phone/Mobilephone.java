@@ -1,8 +1,8 @@
 package place.run.jianying.lab2.Phone;
 
 public class Mobilephone extends Phone implements Moveable {
-    private int battery;     // 电池电量(0-100)
-    private String location;  // 当前位置
+    private int battery;
+    private String location;
 
     public Mobilephone(String number, int battery, String location) {
         super(number);
@@ -20,12 +20,11 @@ public class Mobilephone extends Phone implements Moveable {
         System.out.println("移动电话 " + getNumber() + " 正从 " + location + " 移动到新位置");
     }
 
-    // 移动电话独有：发短信
+
     public void sendSMS(String to, String text) {
         System.out.println(getNumber() + " 发短信给 " + to + "：" + text);
     }
 
-    // 移动电话独有：充电
     public void charge() {
         battery = 100;
         System.out.println(getNumber() + " 充电完成");

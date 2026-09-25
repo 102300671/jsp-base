@@ -16,15 +16,13 @@ public class Test {
             System.out.println("-----");
         }
 
-        // 接口引用指向实现类对象
         Moveable m = new Mobilephone("13800000002", 80, "家");
         m.move();
 
-        // 无绳电话状态机：听筒在座机上时打不出，离座后才能打
         Cordlessphone c = new Cordlessphone("010-62770003", "书房", "L03", 30);
-        c.makeCall("120");          // 在座机上 → 拒绝
-        c.leaveBase();              // 离座
-        c.makeCall("120");          // 离座后 → 成功
-        c.returnBase();             // 放回
+        c.makeCall("120");
+        c.leaveBase();
+        c.makeCall("120");
+        c.returnBase();
     }
 }

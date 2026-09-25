@@ -1,8 +1,8 @@
 package place.run.jianying.lab2.Phone;
 
 public class Cordlessphone extends Fixedphone {
-    private int distance;            // 距座机最大距离(米)
-    private boolean handsetOnBase;   // 听筒是否在座机上
+    private int distance;
+    private boolean handsetOnBase;
 
     public Cordlessphone(String number, String location, String lineId, int distance) {
         super(number, location, lineId);
@@ -19,13 +19,11 @@ public class Cordlessphone extends Fixedphone {
         System.out.println("无绳电话 " + getNumber() + " (距座机≤" + distance + "米) 拨打 " + to);
     }
 
-    // 无绳电话独有：听筒离开座机
     public void leaveBase() {
         handsetOnBase = false;
         System.out.println(getNumber() + " 听筒离开座机");
     }
 
-    // 无绳电话独有：听筒放回座机
     public void returnBase() {
         handsetOnBase = true;
         System.out.println(getNumber() + " 听筒放回座机");
