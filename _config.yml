@@ -172,7 +172,7 @@ include_source:
   webapp_root: "jsp-src/src/main/webapp"
   preview_exts: [jsp, jspx]
   preview_base: "https://59.110.163.88:8443/jsp-base"
-  preview_base_fallback: "http://localhost:8080/jsp-base"
+  preview_base_fallback: "http://localhost:8080/jsp-base,http://localhost:7080/jsp-base"
 
 # ------------ The following options are not recommended to be modified ------------------
 

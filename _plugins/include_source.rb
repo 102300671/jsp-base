@@ -126,7 +126,11 @@ module Jekyll
             }
             var cloud = f.getAttribute('data-src');
             var local = f.getAttribute('data-fallback');
-            if (!local || !cloud) { f.src = cloud || local || ''; return; }
+            var local2 = f.getAttribute('data-fallback2');
+            var fallbacks = [];
+            if (local) fallbacks.push(local);
+            if (local2) fallbacks.push(local2);
+            if (fallbacks.length === 0 || !cloud) { f.src = cloud || fallbacks[0] || ''; return; }
 
             /* 清除可能存在的旧提示（证书信任后重新探测） */
             var box0 = f.closest('.isrc');
@@ -135,9 +139,9 @@ module Jekyll
             /* HTTPS 页面嵌入 HTTP 内容会被浏览器阻止（混合内容策略） */
             var httpsPage = location.protocol === 'https:';
             if (httpsPage && /^http:/.test(cloud)) {
-              if (local && /^https:/.test(local)) {
-                f.setAttribute('data-resolved', local);
-                f.src = local; setOpenLink(f, local);
+              if (fallbacks[0] && /^https:/.test(fallbacks[0])) {
+                f.setAttribute('data-resolved', fallbacks[0]);
+                f.src = fallbacks[0]; setOpenLink(f, fallbacks[0]);
               } else {
                 showNotice(f,
                   '<p>HTTPS 页面无法嵌入 HTTP 预览</p>' +
@@ -149,7 +153,7 @@ module Jekyll
             /* HTTPS 页面 + HTTPS 主地址 + HTTP 回退 → 先探测证书是否已信任
                （自签证书未信任时 fetch 失败；信任后成功，iframe 可嵌入。
                 不写 data-resolved，允许用户接受证书后重新点「预览」重试） */
-            if (httpsPage && /^https:/.test(cloud) && /^http:/.test(local)) {
+            if (httpsPage && /^https:/.test(cloud) && fallbacks[0] && /^http:/.test(fallbacks[0])) {
               var done2 = false;
               var ctrl2 = (typeof AbortController !== 'undefined') ? new AbortController() : null;
               var timer2 = setTimeout(function () {
@@ -176,8 +180,7 @@ module Jekyll
             var timer = setTimeout(function () {
               if (done) return; done = true;
               if (ctrl) try { ctrl.abort(); } catch (e) {}
-              f.setAttribute('data-resolved', local);
-              f.src = local; setOpenLink(f, local);
+              useFallback(f, fallbacks, 0);
             }, 3000);
 
             fetch(cloud, { mode: 'no-cors', cache: 'no-store',
@@ -189,8 +192,41 @@ module Jekyll
               })
               .catch(function () {
                 if (done) return; done = true; clearTimeout(timer);
-                f.setAttribute('data-resolved', local);
-                f.src = local; setOpenLink(f, local);
+                useFallback(f, fallbacks, 0);
+              });
+          }
+
+          /* 顺序探测回退地址（如 localhost:8080 → localhost:7080），
+             每个 3s 超时，成功后固定该地址；全部失败则停在最后一个 */
+          function useFallback(f, list, i) {
+            if (i >= list.length) {
+              /* 全部回退不可达：加载最后一个，浏览器显示连接失败，用户可新窗口打开 */
+              if (list.length > 0) {
+                var last = list[list.length - 1];
+                f.setAttribute('data-resolved', last);
+                f.src = last; setOpenLink(f, last);
+              }
+              return;
+            }
+            var url = list[i];
+            var done2 = false;
+            var ctrl2 = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+            var timer2 = setTimeout(function () {
+              if (done2) return; done2 = true;
+              if (ctrl2) try { ctrl2.abort(); } catch (e) {}
+              useFallback(f, list, i + 1);
+            }, 3000);
+
+            fetch(url, { mode: 'no-cors', cache: 'no-store',
+                         signal: ctrl2 ? ctrl2.signal : undefined })
+              .then(function () {
+                if (done2) return; done2 = true; clearTimeout(timer2);
+                f.setAttribute('data-resolved', url);
+                f.src = url; setOpenLink(f, url);
+              })
+              .catch(function () {
+                if (done2) return; done2 = true; clearTimeout(timer2);
+                useFallback(f, list, i + 1);
               });
           }
 
@@ -424,10 +460,16 @@ module Jekyll
       pv_first  = @opts.key?("preview")
 
       # 站外预览且配置了回退地址 → iframe 初始留空，JS 探测主地址后加载
-      fallback   = external ? preview_fallback_url(site, full) : nil
-      has_fb     = external && !fallback.nil?
+      fallbacks  = external ? preview_fallback_urls(site, full) : []
+      has_fb     = external && !fallbacks.empty?
       iframe_src = has_fb ? "about:blank" : url
-      fb_attr    = has_fb ? %( data-fallback="#{CGI.escapeHTML(fallback)}") : ""
+      fb_attr    = ""
+      if has_fb
+        fb_attr = %( data-fallback="#{CGI.escapeHTML(fallbacks[0])}")
+        fallbacks.drop(1).each_with_index do |u, i|
+          fb_attr += %( data-fallback#{i + 2}="#{CGI.escapeHTML(u)}")
+        end
+      end
 
       code_sel = pv_first ? "false" : "true"
       pv_sel   = pv_first ? "true"  : "false"
@@ -534,19 +576,24 @@ module Jekyll
     # 标签参数 fallback= 优先，其次 _config.yml: include_source.preview_base_fallback
     def preview_base_fallback(site)
       raw = @opts["fallback"] || isrc_config(site)["preview_base_fallback"]
-      raw.to_s.strip.sub(%r{/+\z}, "")
+      Array(raw.to_s.split(",")).map(&:strip).reject(&:empty?).map { |s| s.sub(%r{/+\z}, "") }
     end
 
-    # 回退预览 URL：与 external_preview_url 同构，用 preview_base_fallback
-    def preview_fallback_url(site, full)
-      base = preview_base_fallback(site)
-      return nil unless base =~ %r{\Ahttps?://}
+    # 回退预览 URL 列表：与 external_preview_url 同构，用 preview_base_fallback（可逗号分隔多级）
+    def preview_fallback_urls(site, full)
+      bases = preview_base_fallback(site)
+      return [] unless bases.any? { |b| b =~ %r{\Ahttps?://} }
 
       rel    = full.sub(/\A#{Regexp.escape(site.source)}\/?/, "")
       mapped = mapped_relative(site, rel)
-      return nil unless mapped
-      return nil if mapped.split("/").first.to_s.downcase == "web-inf"
-      "#{base}/#{encode_url(mapped)}"
+      return [] unless mapped
+      return [] if mapped.split("/").first.to_s.downcase == "web-inf"
+      bases.select { |b| b =~ %r{\Ahttps?://} }.map { |b| "#{b}/#{encode_url(mapped)}" }
+    end
+
+    # 兼容单值调用：取第一个回退地址
+    def preview_fallback_url(site, full)
+      preview_fallback_urls(site, full).first
     end
 
     # _config.yml: include_source.webapp_root（相对站点根，不带首尾 /）
