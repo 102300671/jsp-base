@@ -20,6 +20,14 @@
       <a href="/jsp-base/lab1/info/">第 01 章 · 信息</a>
       <div class="desc">第 01 章 · 输出</div>
     </li>
+    <li data-chapter="02">
+      <a href="/jsp-base/lab2/">第 02 章 · 电话继承</a>
+      <div class="desc">第 02 章 · Java 继承/接口/多态 · 交互演示</div>
+    </li>
+    <li data-chapter="03">
+      <a href="/jsp-base/lab3/">第 03 章 · JSP 语法</a>
+      <div class="desc">第 03 章 · 声明/表达式/注释/include 指令</div>
+    </li>
     <!-- NEW_HW_HERE -->
   </ul>
 </body>
