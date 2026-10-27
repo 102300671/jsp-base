@@ -28,6 +28,10 @@
       <a href="/jsp-base/lab3/">第 03 章 · JSP 语法</a>
       <div class="desc">第 03 章 · 声明/表达式/注释/include 指令</div>
     </li>
+    <li data-chapter="04">
+      <a href="/jsp-base/lab4/">第 04 章 · JSP 动作</a>
+      <div class="desc">第 04 章 · include/forward 动作 · 新闻发布系统骨架</div>
+    </li>
     <!-- NEW_HW_HERE -->
   </ul>
 </body>

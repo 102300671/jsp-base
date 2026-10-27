@@ -1,0 +1,8 @@
+<%@page language="java" contentType="text/html;charset=utf-8"%>
+<footer>
+<!--版权-->
+    <div class="banq">
+        本网站所刊载的信息，不代表本网观点。使用本网站稿件，务必经书面授权。
+        未经授权禁止转载、复制及建立镜像，违者将依法追究法律责任。
+    </div>
+</footer>

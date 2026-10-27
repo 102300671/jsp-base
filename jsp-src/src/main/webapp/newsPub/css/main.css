@@ -1,0 +1,173 @@
+/* --- 基础布局 --- */
+#content {
+    width: 950px;
+    margin: 0 auto;
+}
+main {
+    width: 656px;
+    float: right;
+    border: solid 1px #bfdaf5;
+}
+aside {
+    width: 285px;
+    float: left;
+    border: solid 1px #bfdaf5;
+    padding-bottom: 10px;
+}
+
+/* --- Logo 区 --- */
+div#logo_main {
+    background: url("../image/top_bj.gif") no-repeat center;
+    margin: 0 auto;
+    width: 950px;
+    height: 109px;
+    position: relative; /* 用于绝对定位或浮动内部元素 */
+}
+
+/* --- 菜单栏 --- */
+#menu {
+    margin: 0 auto;
+    padding-top: 10px;
+    width: 950px;
+    text-align: center;
+    color: #0000ff;
+    background: #e8f3fb;
+    border-bottom: solid 1px #bfdaf5;
+    height: 30px;
+    clear: both;
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+#menu #user {
+    float: left;
+    margin: 0 20px;
+}
+nav {
+    float: right;
+    height: 30px;
+    margin: 0 20px;
+}
+nav ul {
+    float: left;
+    margin: 0;
+}
+#menu li {
+    display: inline;
+}
+#menu li a, #menu #user a {
+    padding: 3px 5px;
+    color: #0000ff;
+    text-decoration: none;
+}
+#menu li a:hover {
+    color: #ffffff;
+    background: #40b7ed;
+}
+
+/* --- 左侧边栏 (站内检索、热点新闻、最新评论) --- */
+aside section {
+    width: 285px;
+}
+aside hr {
+    width: 264px;
+    margin: 0 auto;
+}
+aside form {
+    margin: 5px 30px;
+    padding: 5px 15px;
+    height: 30px;
+}
+aside input {
+    height: 25px;
+    width: 120px;
+    float: left;
+}
+aside form img {
+    width: 60px;
+    float: right;
+}
+aside h1 {
+    margin: 10px 10px 0;
+    width: 100px;
+    font-weight: bold;
+    font-size: 16px; /* 补充 */
+}
+aside ul {
+    padding-left: 10px;
+    margin-top: 0;
+    margin-left: 1px;
+}
+aside li {
+    font-size: 13px;
+    line-height: 24px;
+    color: #4a5265;
+    width: 280px;
+    overflow: hidden;
+}
+
+/* --- 右侧主体新闻列表 --- */
+.news_list {
+    font-size: 16px;
+    padding: 30px 0 0 30px;
+    clear: both;
+    text-align: center;
+}
+.news_list ul {
+    padding-left: 10px;
+    margin-top: 0;
+    margin-left: 1px;
+}
+.news_list li {
+    width: 610px;
+    height: 28px;
+    list-style: none;
+    line-height: 28px;
+}
+.dd_lm {
+    color: #4a5265;
+    width: 60px;
+    float: left;
+    font-size: 15px;
+}
+.dd_time {
+    color: #919191;
+    float: right;
+    width: 140px;
+    font-size: 13px;
+}
+.dd_bt {
+    color: #333;
+    width: 360px;
+    float: left;
+    text-align: left;
+    font-size: 15px;
+}
+.dd_bt a, .dd_bt a:visited {
+    color: #333;
+    text-decoration: none;
+}
+.dd_bt a:hover {
+    color: #990000;
+    text-decoration: underline;
+}
+
+/* --- 辅助与页脚 --- */
+.blank20 {
+    height: 10px;
+    overflow: hidden;
+    clear: both;
+}
+.blank10 {
+    height: 10px;
+    overflow: hidden;
+    clear: both;
+    background: url("../image/bottom_top.jpg") bottom;
+}
+.banq {
+    color: #999999;
+    text-align: center;
+    padding: 8px;
+    line-height: 22px;
+    font-size: 12px;
+}
