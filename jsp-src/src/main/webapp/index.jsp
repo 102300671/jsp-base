@@ -32,6 +32,10 @@
       <a href="/jsp-base/lab4/">第 04 章 · JSP 动作</a>
       <div class="desc">第 04 章 · include/forward 动作 · 新闻发布系统骨架</div>
     </li>
+    <li data-chapter="05">
+      <a href="/jsp-base/lab5/">第 05 章 · request/response</a>
+      <div class="desc">第 05 章 · request/response 内置对象 · session 登录状态</div>
+    </li>
     <!-- NEW_HW_HERE -->
   </ul>
 </body>
