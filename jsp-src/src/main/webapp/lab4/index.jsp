@@ -21,8 +21,8 @@
     <ol>
         <li>include 动作 Demo
             <ul>
-                <li><a href="demo/includeDemo2_1.jsp">includeDemo2_1.jsp</a><span class="desc">— jsp:include 动态包含并 jsp:param 传参</span></li>
-                <li><a href="demo/includeDemo2_2.jsp">includeDemo2_2.jsp</a><span class="desc">— 接收参数，求 1~300 连续和</span></li>
+                <li><a href="demo/includeDemo2_1.jsp">includeDemo2_1.jsp</a><span class="desc">— 动态包含 includeDemo2_2.jsp，jsp:param 传参 computer=300，求 1~300 连续和（演示入口）</span></li>
+                <li>includeDemo2_2.jsp<span class="desc">— 被包含页：接收 computer 参数求连续和；请经 includeDemo2_1.jsp 访问（直连需带 ?computer=300）</span></li>
             </ul>
         </li>
         <li>forward 动作 Demo（demo/login/）
