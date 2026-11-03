@@ -80,6 +80,20 @@ module Jekyll
           font-size: 0.9rem; color: #6c757d; background: #fff; text-align: center; padding: 1rem;
         }
         .isrc-notice a { color: var(--bs-primary, #3674b9); text-decoration: underline; }
+        .isrc-notice .isrc-hint { font-size: 0.8rem; color: #8a929c; max-width: 32rem; line-height: 1.5; }
+        .isrc-acts { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin: 0.25rem 0 0; }
+        .isrc-btn {
+          padding: 0.25rem 0.8rem;
+          font-size: 0.82rem;
+          border-radius: 6px;
+          border: 1px solid var(--language-border-color, #dee2e6);
+          background: #fff;
+          color: inherit;
+          cursor: pointer;
+        }
+        .isrc-btn:hover { border-color: var(--bs-primary, #3674b9); color: var(--bs-primary, #3674b9); }
+        .isrc-btn-primary { background: var(--bs-primary, #3674b9); border-color: transparent; color: #fff; }
+        .isrc-btn-primary:hover { color: #fff; opacity: 0.9; }
       </style>
       <script>
         (function () {
@@ -109,12 +123,19 @@ module Jekyll
             pane.appendChild(div);
           }
 
-          /* 证书未信任时的提示 */
-          function showCertNotice(f, url) {
+          /* 证书未信任 / 云端不可达时的提示：给出可操作按钮，避免困在死提示里 */
+          function showCloudNotice(f, url, fallbacks) {
+            var acts = '<p class="isrc-acts">' +
+              '<button type="button" class="isrc-btn" data-act="retry">重试</button>' +
+              '<button type="button" class="isrc-btn isrc-btn-primary" data-act="force">已信任证书，直接加载</button>' +
+              (fallbacks.length > 0 ? '<button type="button" class="isrc-btn" data-act="local">改用本地预览</button>' : '') +
+              '<a href="' + url + '" target="_blank" rel="noopener">在新窗口打开 ↗</a>' +
+              '</p>';
             showNotice(f,
-              '<p>需要先信任证书才能预览</p>' +
-              '<p style="font-size:0.8rem">点击下方链接在新窗口打开，接受证书警告后回到此处再点「预览」</p>' +
-              '<a href="' + url + '" target="_blank" rel="noopener">在新窗口打开 ↗</a>');
+              '<p>云端预览打不开：多半是自签证书还没信任，也可能服务器暂时不可达。</p>' +
+              '<p class="isrc-hint">点「在新窗口打开」，在提示页选「高级 → 继续前往」信任证书，' +
+              '回到本页会自动重试；仍不行就点「已信任证书，直接加载」跳过检测。</p>' + acts);
+            f.setAttribute('data-notice', 'cloud');
           }
 
           /* 主地址优先、回退兜底：fetch 探测主地址可达性，3s 超时则用 fallback */
@@ -135,6 +156,13 @@ module Jekyll
             /* 清除可能存在的旧提示（证书信任后重新探测） */
             var box0 = f.closest('.isrc');
             if (box0) { var n0 = box0.querySelector('.isrc-notice'); if (n0) n0.remove(); }
+
+            /* 用户此前点过「已信任证书，直接加载」→ 不再探测，直接嵌云端 */
+            if (trustedCloud()) {
+              f.setAttribute('data-resolved', cloud);
+              f.src = cloud; setOpenLink(f, cloud);
+              return;
+            }
 
             /* HTTPS 页面嵌入 HTTP 内容会被浏览器阻止（混合内容策略） */
             var httpsPage = location.protocol === 'https:';
@@ -159,7 +187,7 @@ module Jekyll
               var timer2 = setTimeout(function () {
                 if (done2) return; done2 = true;
                 if (ctrl2) try { ctrl2.abort(); } catch (e) {}
-                showCertNotice(f, cloud);
+                showCloudNotice(f, cloud, fallbacks);
               }, 3000);
               fetch(cloud, { mode: 'no-cors', cache: 'no-store',
                              signal: ctrl2 ? ctrl2.signal : undefined })
@@ -170,7 +198,7 @@ module Jekyll
                 })
                 .catch(function () {
                   if (done2) return; done2 = true; clearTimeout(timer2);
-                  showCertNotice(f, cloud);
+                  showCloudNotice(f, cloud, fallbacks);
                 });
               return;
             }
@@ -260,6 +288,65 @@ module Jekyll
               var f = box.querySelector('.isrc-preview iframe');
               if (f && !f.getAttribute('data-resolved')) resolveSrc(f);
             }
+          });
+
+          /* --- 提示面板上的操作按钮：重试 / 已信任直接加载 / 改用本地预览 --- */
+          function clearNotice(f) {
+            var box = f.closest('.isrc');
+            if (!box) return;
+            var n = box.querySelector('.isrc-notice');
+            if (n) n.remove();
+            f.removeAttribute('data-notice');
+          }
+
+          function trustedCloud() {
+            try { return localStorage.getItem('isrc_trust_cloud') === '1'; }
+            catch (e) { return false; }
+          }
+
+          document.addEventListener('click', function (e) {
+            var btn = e.target.closest && e.target.closest('.isrc-btn');
+            if (!btn) return;
+            var box = btn.closest('.isrc');
+            if (!box) return;
+            var f = box.querySelector('.isrc-preview iframe');
+            if (!f) return;
+            var act  = btn.getAttribute('data-act');
+            var cloud = f.getAttribute('data-src');
+            var fb    = f.getAttribute('data-fallback');
+
+            if (act === 'retry') {
+              clearNotice(f);
+              f.removeAttribute('data-resolved');
+              resolveSrc(f);
+            } else if (act === 'force' && cloud) {
+              clearNotice(f);
+              try { localStorage.setItem('isrc_trust_cloud', '1'); } catch (err) {}
+              f.setAttribute('data-resolved', cloud);
+              f.src = cloud; setOpenLink(f, cloud);
+            } else if (act === 'local' && fb) {
+              clearNotice(f);
+              f.setAttribute('data-resolved', fb);
+              f.src = fb; setOpenLink(f, fb);
+            }
+          });
+
+          /* 用户在新窗口信任证书后切回来 → 自动重探一次（不用再手动点预览 tab） */
+          var focusTimer = null;
+          window.addEventListener('focus', function () {
+            if (focusTimer) return;
+            focusTimer = setTimeout(function () {
+              focusTimer = null;
+              if (trustedCloud()) return;
+              var pending = [];
+              document.querySelectorAll('.isrc-preview iframe').forEach(function (f) {
+                if (f.getAttribute('data-notice') === 'cloud' &&
+                    !f.getAttribute('data-resolved')) {
+                  pending.push(f);
+                }
+              });
+              pending.forEach(function (f) { clearNotice(f); resolveSrc(f); });
+            }, 500);
           });
 
           /* 初始默认显示预览的组件立即探测 */
