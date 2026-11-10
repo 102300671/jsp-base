@@ -36,6 +36,10 @@
       <a href="/jsp-base/lab5/">第 05 章 · request/response</a>
       <div class="desc">第 05 章 · request/response 内置对象 · session 登录状态</div>
     </li>
+    <li data-chapter="06">
+      <a href="/jsp-base/lab6/">第 06 章 · Cookie 与 Session</a>
+      <div class="desc">第 06 章 · Cookie 读写 · Session 猜数游戏</div>
+    </li>
     <!-- NEW_HW_HERE -->
   </ul>
 </body>
