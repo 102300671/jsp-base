@@ -26,6 +26,10 @@ package-lock.json
 _sass/vendors
 assets/js/dist
 
+# 本地截图与打包产物（体积大，不入库；文章里用 include_source 直接展示源码）
+assets/screenshot/
+assets/zip/
+
 # Hidden system files
 *~
 .DS_Store
