@@ -3,14 +3,8 @@
 <BODY bgcolor=cyan>
     <FONT Size=4>
     <%
-        Integer countObj=(Integer)session.getAttribute("count");
-        Integer numObj=(Integer)session.getAttribute("save");
-        if(countObj==null || numObj==null){
-            response.sendRedirect("guess.jsp");
-            return;
-        }
-        int count=countObj.intValue();
-        int num=numObj.intValue();
+        int count=((Integer)session.getAttribute("count")).intValue();
+        int num=((Integer)session.getAttribute("save")).intValue();
         long startTime=session.getCreationTime();
         long endTime=session.getLastAccessedTime();
     %>

@@ -7,15 +7,13 @@
     String bgcolor="";
     StringBuffer str =new StringBuffer();
     Cookie[] cookies=request.getCookies();
-    if(cookies!=null){
-        for(int i=0;i<cookies.length;i++)
+    for(int i=0;i<cookies.length;i++)
+    {
+        str.append("<br>cookie"+i+" name:"+cookies[i].getName()
+            +", value:" +cookies[i].getValue());
+        if("bg".equals(cookies[i].getName()))
         {
-            str.append("<br>cookie"+i+" name:"+cookies[i].getName()
-                +", value:" +cookies[i].getValue());
-            if("bg".equals(cookies[i].getName()))
-            {
-                bgcolor=cookies[i].getValue();
-            }
+            bgcolor=cookies[i].getValue();
         }
     }
 %>

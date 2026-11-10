@@ -8,12 +8,8 @@
         if(str==null){
             str="0";
         }
-        Integer integer=(Integer)session.getAttribute("save");
-        if(integer==null){
-            response.sendRedirect("guess.jsp");
-            return;
-        }
         int guessNumber=Integer.parseInt(str);
+        Integer integer=(Integer)session.getAttribute("save");
         int realnumber=integer.intValue();
         int n=((Integer)session.getAttribute("count")).intValue();
         n=n+1;

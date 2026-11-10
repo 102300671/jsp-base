@@ -10,7 +10,7 @@
         </form>
         <%
             String str=request.getParameter("bgcolor");
-            if(str!=null && !"".equals(str)){
+            if(!"".equals(str)){
                 Cookie c=new Cookie("bg",str);
                 response.addCookie(c);
             }

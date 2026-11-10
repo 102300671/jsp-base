@@ -22,21 +22,21 @@
     <ol>
         <li>Cookie 演示（demo/cookieDemo/）
             <ul>
-                <li><a href="demo/cookieDemo/bgset.jsp">bgset.jsp</a><span class="desc">— 表单提交背景色，用 response.addCookie 写入 Cookie（bg）<b>← 从这里开始</b></span></li>
-                <li><a href="demo/cookieDemo/bgshow.jsp">bgshow.jsp</a><span class="desc">— 用 request.getCookies 遍历全部 Cookie，并用 bg 的值设置页面背景色</span></li>
+                <li><a href="demo/cookieDemo/bgset.jsp">bgset.jsp</a><span class="desc">— 表单提交背景色，用 response.addCookie 写入 Cookie（bg）<b>← 从这里进入</b></span></li>
+                <li>bgshow.jsp<span class="desc">— 用 request.getCookies 遍历全部 Cookie，并用 bg 的值设置页面背景色；请从 bgset.jsp 点链接进入</span></li>
             </ul>
         </li>
         <li>Session 演示 · 猜数游戏（demo/sessionDemo/）
             <ul>
-                <li><a href="demo/sessionDemo/guess.jsp">guess.jsp</a><span class="desc">— 随机生成 1~100，存入 session 的 save，次数 count 清零<b>← 从这里开始</b></span></li>
-                <li><a href="demo/sessionDemo/result.jsp">result.jsp</a><span class="desc">— 比较所猜数：count+1，相等转 success，大转 large，小转 small</span></li>
-                <li><a href="demo/sessionDemo/success.jsp">success.jsp</a><span class="desc">— 猜中：显示次数与用时（getCreationTime / getLastAccessedTime）</span></li>
+                <li><a href="demo/sessionDemo/guess.jsp">guess.jsp</a><span class="desc">— 随机生成 1~100，存入 session 的 save，次数 count 清零<b>← 从这里进入</b></span></li>
+                <li>result.jsp<span class="desc">— 比较所猜数：count+1，相等转 success，大转 large，小转 small</span></li>
+                <li>success.jsp<span class="desc">— 猜中：显示次数与用时（getCreationTime / getLastAccessedTime）</span></li>
                 <li><a href="demo/sessionDemo/large.jsp">large.jsp</a><span class="desc">— 猜大了，重新提供表单</span></li>
                 <li><a href="demo/sessionDemo/small.jsp">small.jsp</a><span class="desc">— 猜小了，重新提供表单</span></li>
             </ul>
         </li>
     </ol>
-    <p class="note">Cookie 与 Session 依赖浏览器会话，必须在同一浏览器窗口内连续操作；
-        游戏从 guess.jsp 开始，直接从 result.jsp / success.jsp 进入会自动跳回 guess.jsp。</p>
+    <p class="note">代码与教材【程序 4.12–4.18】保持一致。其中 bgshow.jsp 依赖 Cookie、result.jsp / success.jsp
+        依赖 guess.jsp 建立的 Session，单独访问会因取不到数据而报错，因此只标注为流程内页面，不提供直接入口。</p>
 </body>
 </html>
